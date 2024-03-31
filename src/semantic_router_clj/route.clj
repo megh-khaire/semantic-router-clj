@@ -29,7 +29,8 @@
                                :embeddings embeddings
                                :threshold (or threshold 0))]
       (srcs/validate-route updated-route :create)
-      (swap! route-index assoc-in [layer-ns (:name route)] updated-route))
+      (swap! route-index assoc-in [layer-ns (:name route)] updated-route)
+      (:name route))
     (throw (ex-info "Invalid layer-ns, are you sure you have defined a layer?"
                     {:layer-ns layer-ns
                      :route route}))))
@@ -70,7 +71,8 @@
 
       :always (fn [index-route*]
                 (srcs/validate-route index-route* :update)
-                (swap! route-index assoc-in [layer-ns route-name] index-route*)))
+                (swap! route-index assoc-in [layer-ns route-name] index-route*)
+                (:name route)))
     (throw (ex-info "Invalid route, are you sure this route exists?"
                     {:layer-ns layer-ns
                      :route route}))))

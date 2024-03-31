@@ -16,13 +16,13 @@ First, we need to set the API key and create a layer that will handle the routin
 ;; Set API key
 (srco/set-api-key "your-api-key")
 
-;; Create a new layer called :first-layer
+;; Create a new layer with name -> :first-layer
 (srcl/layer :first-layer
             :threshold 0.5
             :model "text-embedding-3-small"
             :aggregation-method :mean)
 
-;; Retrieve any defined layer
+;; Retrieve the defined layer
 (srcl/get-layer :first-layer)
 ```
 
@@ -48,7 +48,7 @@ Each route includes a set of utterances that exemplify the kind of messages it s
                               "they're going to destroy this country!",
                               "they will save the country!"]})
 
-;; Retrieve any defined route
+;; Retrieve the defined route for a namespace
 (srcr/get-route :first-layer :chitchat)
 ```
 

@@ -29,20 +29,32 @@
 
 
 (defn validate-route
+  "Validates a route against a schema based on the specified method (:create or :update).
+   Throws an exception if validation fails."
   [route method]
-  (when-not
-   (case method
-     :create (m/validate Route route)
-     :update (m/validate Route-Update route)
-     nil)
-    (throw (ex-info "Invalid Route" route))))
+  (if-let [schema (case method
+                    :create Route
+                    :update Route-Update
+                    nil)]
+    (when-not (m/validate schema route)
+      (throw (ex-info "Spec validation failed for route"
+                      {:explaination (m/explain schema route)
+                       :route route})))
+    (throw (ex-info "Invalid route validation method"
+                    {:method method}))))
 
 
 (defn validate-layer
+  "Validates a layer against a schema based on the specified method (:create or :update).
+   Throws an exception if validation fails."
   [layer method]
-  (when-not
-   (case method
-     :create (m/validate Layer layer)
-     :update (m/validate Layer-Update layer)
-     nil)
-    (throw (ex-info "Invalid Layer" layer))))
+  (if-let [schema (case method
+                    :create Layer
+                    :update Layer-Update
+                    nil)]
+    (when-not (m/validate schema layer)
+      (throw (ex-info "Spec validation failed for layer"
+                      {:explaination (m/explain schema layer)
+                       :layer layer})))
+    (throw (ex-info "Invalid layer validation method"
+                    {:method method}))))

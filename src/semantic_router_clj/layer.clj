@@ -34,4 +34,7 @@
   "Updates a layer with the given settings: layer-ns, threshold, model, and aggregation-method."
   [layer-ns & {:keys [_threshold _model _aggregation-method] :as layer}]
   (srcs/validate-layer layer :update)
-  (swap! layer-index update layer-ns merge layer))
+  (if (get @layer-index layer-ns nil)
+    (swap! layer-index update layer-ns merge layer)
+    (throw (ex-info "Layer does not exist"
+                    {:layer layer}))))

@@ -7,8 +7,11 @@
 
 
 (defn router
+  "Routes a query to the top matching layer based on the namespace `layer-ns`.
+   Generates an embedding for the query and uses it to find the best route."
   [layer-ns query]
   {:pre [(keyword? layer-ns)]}
+  (srco/validate-api-key)
   (let [layer (srcl/get-layer layer-ns)
         embedding (-> {:input query}
                       (assoc :model (:model layer))

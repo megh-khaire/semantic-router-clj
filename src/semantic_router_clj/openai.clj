@@ -10,11 +10,20 @@
 
 
 (defn set-api-key
+  "Sets the global `api-key` variable to the given value."
   [value]
   (alter-var-root #'api-key (constantly value)))
 
 
+(defn validate-api-key
+  "Checks if the global `api-key` variable is set to a non-nil value. Returns true if set, false otherwise."
+  []
+  (when-not (string? api-key)
+    (throw (ex-info "API Key is not set!" {}))))
+
+
 (defn extract-embeddings
+  "Extracts and accumulates the `embedding` values from a sequence of maps in `data`."
   [data]
   (reduce (fn [acc {:keys [embedding]}]
             (conj acc embedding))
