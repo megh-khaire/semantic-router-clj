@@ -2,6 +2,8 @@
 
 > Decision making layer for LLMs in Clojure
 
+[![Clojars Project](https://img.shields.io/clojars/v/org.clojars.megh/semantic-router-clj.svg)](https://clojars.org/org.clojars.megh/semantic-router-clj)
+
 semantic-router-clj is a Clojure library designed for routing text inputs to predefined routes based on their semantic content. It is inspired by [semantic-router](https://github.com/aurelio-labs/semantic-router) and is useful for guiding chatbot conversations based on topics like chitchat, politics, etc.
 
 ## Usage
