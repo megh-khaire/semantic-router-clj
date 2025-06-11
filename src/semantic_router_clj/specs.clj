@@ -10,9 +10,9 @@
 
 (def Route-Update
   [:map
-   [:utterances {:optional true} [:vector :string]]
+   [:utterances {:optional true} [:vector [:and string? [:fn #(not-empty %)]]]]
    [:threshold {:optional true} [:or :int :double]]
-   [:embeddings [:vector [:vector :double]]]])
+   [:embeddings {:optional true} [:vector [:vector :double]]]])
 
 (def Layer
   [:map

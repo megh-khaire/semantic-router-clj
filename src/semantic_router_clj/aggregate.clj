@@ -15,7 +15,7 @@
     (throw (IllegalArgumentException. (str "Unsupported method: " method)))))
 
 
-(defn- get-similarity-scores
+(defn get-similarity-scores
   "Compute the similarity scores between a query vector and a set of vectors"
   [query-vector route]
   (reduce (fn [similar-vectors index-vector]
