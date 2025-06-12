@@ -1,12 +1,17 @@
 (ns semantic-router-clj.route
   (:require [cheshire.core :refer [generate-string]]
             [clojure.set :as cset]
-            [semantic-router-clj.specs :as srcs]
+            [semantic-router-clj.aggregate :as srca]
             [semantic-router-clj.layer :as srcl]
             [semantic-router-clj.openai :as srco]
-            [semantic-router-clj.aggregate :as srca]))
+            [semantic-router-clj.specs :as srcs]))
 
 (def route-index (atom {}))
+
+(defn get-routes
+  "Gets route from layer"
+  [layer-ns]
+  (get @route-index layer-ns nil))
 
 
 (defn get-route
@@ -22,8 +27,13 @@
    THIS FUNCTION WILL OVERWRITE ANY EXISTING ROUTE WITH THE SAME NS & NAME"
   [layer-ns {:keys [threshold] :as route}]
   (if-let [layer (srcl/get-layer layer-ns)]
-    (let [payload (generate-string {:model (:model layer)
-                                    :input (:utterances route)})
+    (let [utterances (:utterances route)
+          _ (when (empty? utterances)
+              (throw (ex-info "Cannot create route with empty utterances"
+                              {:layer-ns layer-ns
+                               :route route})))
+          payload (generate-string {:model (:model layer)
+                                    :input utterances})
           embeddings (srco/generate-embeddings payload)
           updated-route (assoc route
                                :embeddings embeddings
@@ -36,18 +46,18 @@
                      :route route}))))
 
 
-(defn- update-route-utternaces
+(defn- update-route-utterances
   [index-route layer-ns utterances]
-  (let [new-utterances (cset/difference utterances
-                                        (:utterances index-route))]
+  (let [new-utterances (cset/difference (set utterances)
+                                        (set (:utterances index-route)))]
     (if (seq new-utterances)
       (let [layer (srcl/get-layer layer-ns)
             payload (generate-string {:model (:model layer)
                                       :input new-utterances})
             embeddings (srco/generate-embeddings payload)]
         (-> index-route
-            (update :utterances concat new-utterances)
-            (update :embeddings concat embeddings)))
+            (update :utterances into new-utterances)
+            (update :embeddings into embeddings)))
       index-route)))
 
 
@@ -62,17 +72,13 @@
    Note: Ensure that the route is defined before using this function.
    THIS FUNCTION WILL ADD DATA TO EXISTING ROUTE"
   [layer-ns route-name route]
-  (if-let [index-route (get-route layer-ns route)]
-    (cond-> index-route
-      (:utterances route) (update-route-utternaces layer-ns
-                                                   (:utterances route))
-
-      (:threshold route) (update-route-threshold (:threshold route))
-
-      :always (fn [index-route*]
-                (srcs/validate-route index-route* :update)
-                (swap! route-index assoc-in [layer-ns route-name] index-route*)
-                (:name route)))
+  (if-let [index-route (get-route layer-ns route-name)]
+    (let [updated-route (cond-> index-route
+                          (:utterances route) (update-route-utterances layer-ns (:utterances route))
+                          (:threshold route) (update-route-threshold (:threshold route)))]
+      (srcs/validate-route updated-route :update)
+      (swap! route-index assoc-in [layer-ns route-name] updated-route)
+      route-name)
     (throw (ex-info "Invalid route, are you sure this route exists?"
                     {:layer-ns layer-ns
                      :route route}))))
@@ -96,7 +102,7 @@
   "For the given layer returns the route with highest semantic score
    based on the given aggregation method"
   [{:keys [layer-ns threshold aggregation-method]} query-vector]
-  (let [routes (layer-ns @route-index)
+  (let [routes (get @route-index layer-ns)
         aggregation-fn (srca/get-aggregation-fn aggregation-method)
         route->scores (reduce-kv
                        (fn [acc route-name route]

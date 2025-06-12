@@ -1,10 +1,16 @@
 (ns semantic-router-clj.layer
   (:require [semantic-router-clj.aggregate :as srca]
-            [semantic-router-clj.specs :as srcs]
-            [semantic-router-clj.openai :as srco]))
+            [semantic-router-clj.openai :as srco]
+            [semantic-router-clj.specs :as srcs]))
 
 ;; Atom to hold the index of layers
 (def layer-index (atom {}))
+
+
+(defn get-layers
+  "Return all layers"
+  []
+  @layer-index)
 
 
 (defn get-layer
