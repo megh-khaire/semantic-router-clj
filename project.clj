@@ -1,4 +1,4 @@
-(defproject org.clojars.megh/semantic-router-clj "0.1.0-alpha.1"
+(defproject org.clojars.megh/semantic-router-clj "0.1.0-alpha.2"
   :author "Megh Khaire"
   :description "Decision making layer for LLMs in Clojure"
   :license {:name "The MIT License"
